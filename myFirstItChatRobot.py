@@ -6,6 +6,7 @@ import itchat, time, re, json, random, requests
 from itchat.content import *
 from languageLibrary import *
 from Translate import *
+from voiceRecognition import *
 
 AUTOSWITCH = True # 全局开关
 
@@ -69,6 +70,20 @@ def switchOnAndOff(msg):
       itchat.send( 'OK', toUserName='filehelper')
     elif msg['Text'] == '托管状态':
       itchat.send(AUTOREPLYSTATUS[AUTOSWITCH], toUserName='filehelper')
+
+@itchat.msg_register(itchat.content.RECORDING)
+def voice_reply(msg):
+    filename = msg['FileName']
+    new_filename = filename + ".wav"
+    msg['Text'](filename) # 下载MP3
+    output = os.popen("lame --decode {0} {1}".format(filename, new_filename)) # 转换格式
+    sleep(2) # 等待格式转换
+    voice_text = wav2text.wav_to_text(new_filename).rstrip(',').strip()
+    defaultReply = u'风太大，我听不清'
+    if not voice_text:
+        itchat.send(defaultReply, msg['FromUserName'])
+    else:
+        itchat.send(voice_text, msg['FromUserName'])
 
 @itchat.msg_register([PICTURE, RECORDING, ATTACHMENT, VIDEO])
 def download_files(msg):
