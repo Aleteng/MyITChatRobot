@@ -34,6 +34,13 @@ def text_reply(msg):
         if re.search('翻译', messages):
             itchat.send('只要在你要翻译的内容前加上+_+就可以翻译咯', msg['FromUserName'])
 
+        # 临时新加，之后删
+        if re.search('在吗', messages) or re.search('在么', messages) or re.search('在嘛', messages):
+            itchat.send("你好呀，我是田a的影分身，他还在实验室疯狂科研，稍后回复你哦，\n\
+我新加了识别语音的功能，可以识别普通话并将你说的话转成文字，但是翻译的不是很准确，没准会翻译成什么看不懂的奇怪的话，\
+如果想试的话可以试一下哈哈。另外如果你发”工作“”学习“之类的词会有惊喜哦\n————来自田a",msg['FromUserName'])
+
+
         if messages.strip()[:3] == '+_+':
             ori_msg,zh_msg = youdao_trans(messages[3:], 1)
             itchat.send(zh_msg, msg['FromUserName'])
