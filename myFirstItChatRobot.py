@@ -2,7 +2,7 @@
 # 参考文档: https://segmentfault.com/a/1190000009420701
 #          https://mp.weixin.qq.com/s/p5I6zimaBY8DqI2xW3WBNQ
 
-import itchat, time, re, json, random, requests
+import itchat, time, re, json, random, requests, os
 from itchat.content import *
 from languageLibrary import *
 from Translate import *
@@ -74,24 +74,26 @@ def switchOnAndOff(msg):
 @itchat.msg_register(itchat.content.RECORDING)
 def voice_reply(msg):
     filename = msg['FileName']
-    new_filename = filename + ".wav"
+    new_filename = filename.split('.')[0] + ".wav"
     msg['Text'](filename) # 下载MP3
-    output = os.popen("lame --decode {0} {1}".format(filename, new_filename)) # 转换格式
-    sleep(2) # 等待格式转换
-    voice_text = wav2text.wav_to_text(new_filename).rstrip(',').strip()
-    defaultReply = u'风太大，我听不清'
+    output = os.popen("lame --decode {0} {1} -h".format(filename, new_filename)) # 转换格式
+    time.sleep(2) # 等待格式转换
+    # os.popen("sox {0} -r 16000 {1}".format(new_filename, new_filename))
+    # time.sleep(1)
+    voice_text = wave2text(new_filename).rstrip(',').strip()
+    defaultReply = u'我听不清你在说什么啊○△○||'
     if not voice_text:
         itchat.send(defaultReply, msg['FromUserName'])
     else:
         itchat.send(voice_text, msg['FromUserName'])
 
-@itchat.msg_register([PICTURE, RECORDING, ATTACHMENT, VIDEO])
-def download_files(msg):
-    msg.download(msg.fileName)
-    typeSymbol = {
-        PICTURE: 'img',
-        VIDEO: 'vid', }.get(msg.type, 'fil')
-    return '@%s@%s' % (typeSymbol, msg.fileName)
+# @itchat.msg_register([PICTURE, RECORDING, ATTACHMENT, VIDEO])
+# def download_files(msg):
+#     msg.download(msg.fileName)
+#     typeSymbol = {
+#         PICTURE: 'img',
+#         VIDEO: 'vid', }.get(msg.type, 'fil')
+#     return '@%s@%s' % (typeSymbol, msg.fileName)
 
 def main():
     itchat.auto_login(True)
